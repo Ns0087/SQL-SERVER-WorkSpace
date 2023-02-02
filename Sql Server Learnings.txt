@@ -1,0 +1,677 @@
+-------------------------------------------------------- SQL SERVER --------------------------------------------------------
+
+-------------------------------------------- 01/ 02/ 2023 -----------------------------------------------------
+
+--> SSMS is a client tool and not the server by itself.
+--> Developer Machine connects to SQL Server using SSMS.
+--> Windows Username and password will be used in Windows Authentication Method.
+--> .MDF File - Data File (Contains actual data).
+--> .LDF File - Transaction Log File (Used to recover the database).
+
+*SELECT STATEMENT
+
+1. Select specific or all columns
+2. Distinct rows
+3. Filtering with where clause.
+4. Wild Cards in SQL Server
+5. Joining multiple conditions using AND and OR operators
+6. Sorting rows using order by
+7. Selecting top n or top n percentage of rows*
+
+
+1. Basic select statement syntax
+SELECT Column_List
+FROM Table_Name
+
+2. Select all columns
+SELECT *
+FROM Table_Name
+
+3. To Select distinct rows use DISTINCT keyword
+SELECT DISTINCT Column_List
+FROM Table_Name
+
+Example: Select distinct city from tblPerson
+
+4. Filtering rows with WHERE clause
+SELECT Column_List
+FROM Table_Name
+WHERE Filter_Condition
+
+Example: SELECT CustomerID, CustomerName  FROM [Customers] where Country = 'Mexico';
+
+The WHERE clause can be combined with AND, OR, and NOT operators.
+
+The AND and OR operators are used to filter records based on more than one condition:
+
+The AND operator displays a record if all the conditions separated by AND are TRUE.
+The OR operator displays a record if any of the conditions separated by OR is TRUE.
+The NOT operator displays a record if the condition(s) is NOT TRUE.
+
+The LIKE operator is used in a WHERE clause to search for a specified pattern in a column.
+
+LIKE Operator						Description
+WHERE CustomerName LIKE 'a%'	Finds any values that start with "a"
+WHERE CustomerName LIKE '%a'	Finds any values that end with "a"
+WHERE CustomerName LIKE '%or%'	Finds any values that have "or" in any position
+WHERE CustomerName LIKE '_r%'	Finds any values that have "r" in the second position
+WHERE CustomerName LIKE 'a_%'	Finds any values that start with "a" and are at least 2 characters in length
+WHERE CustomerName LIKE 'a__%'	Finds any values that start with "a" and are at least 3 characters in length
+WHERE ContactName LIKE 'a%o'	Finds any values that start with "a" and ends with "o"
+
+
+Wildcard Characters in SQL Server
+Symbol			Description	Example
+%			Represents zero or more characters	bl% finds bl, black, blue, and blob
+_			Represents a single character	h_t finds hot, hat, and hit
+[]			Represents any single character within the brackets	h[oa]t finds hot and hat, but not hit
+^			Represents any character not in the brackets	h[^oa]t finds hit, but not hot and hat
+-			Represents any single character within the specified range	c[a-b]t finds cat and cbt
+
+
+The IN operator allows you to specify multiple values in a WHERE clause.
+
+The IN operator is a shorthand for multiple OR conditions.
+
+EX - SELECT * FROM Customers
+WHERE Country IN ('Germany', 'France', 'UK');
+
+EX - SELECT * FROM Customers
+WHERE Country IN (SELECT Country FROM Suppliers);
+
+
+The BETWEEN operator selects values within a given range. The values can be numbers, text, or dates.
+
+The BETWEEN operator is inclusive: begin and end values are included. 
+
+EX - SELECT * FROM Products
+WHERE Price BETWEEN 10 AND 20;
+
+Ex - SELECT * FROM Products
+WHERE ProductName BETWEEN 'Carnarvon Tigers' AND 'Mozzarella di Giovanni'
+ORDER BY ProductName;
+
+
+The ORDER BY keyword is used to sort the result-set in ascending or descending order.
+
+The ORDER BY keyword sorts the records in ascending order by default. To sort the records in descending order, use the DESC keyword.
+
+EX - SELECT * FROM Customers
+ORDER BY Country;
+
+The following SQL statement selects all customers from the "Customers" table, sorted by the "Country" and the "CustomerName" column. 
+This means that it orders by Country, but if some rows have the same Country, it orders them by CustomerName:
+
+Ex - SELECT * FROM Customers
+ORDER BY Country, CustomerName;
+
+
+The SELECT TOP clause is used to specify the number of records to return.
+
+The SELECT TOP clause is useful on large tables with thousands of records. Returning a large number of records can impact performance.
+
+EX - SELECT TOP 3 * FROM Customers;
+
+EX - SELECT TOP 50 PERCENT * FROM Customers;
+
+------------------ GROUP BY & HAVING CLAUSE ----------------------------
+
+The GROUP BY statement groups rows that have the same values into summary rows, like "find the number of customers in each country".
+
+The GROUP BY statement is often used with aggregate functions (COUNT(), MAX(), MIN(), SUM(), AVG()) to group the result-set by one or more columns.
+
+The HAVING clause was added to SQL because the WHERE keyword cannot be used with aggregate functions.
+
+EX - SELECT COUNT(CustomerID), Country
+FROM Customers
+GROUP BY Country;
+
+EX - Select City, Gender, SUM(Salary) as TotalSalary,
+COUNT(ID) as TotalEmployees
+from tblEmployee
+group by City, Gender
+
+EX - SELECT COUNT(CustomerID), Country
+FROM Customers
+GROUP BY Country
+HAVING COUNT(CustomerID) > 5;
+
+-------------------- JOINS ----------------------------
+
+In SQL server, there are different types of JOINS.
+1. CROSS JOIN
+2. INNER JOIN 
+3. OUTER JOIN 
+
+Outer Joins are again divided into 3 types
+1. Left Join or Left Outer Join
+2. Right Join or Right Outer Join
+3. Full Join or Full Outer Join
+
+
+--> General Formula for Joins
+
+SELECT      ColumnList
+FROM           LeftTableName
+JOIN_TYPE  RightTableName
+ON                 JoinCondition
+
+------------------- CROSS JOIN ----------------------
+
+CROSS JOIN, produces the cartesian product of the 2 tables involved in the join. For example, in the Employees table we have 10 rows and in the Departments table we have 4 rows. So, a cross join between these 2 tables produces 40 rows. Cross Join shouldn't have ON clause. 
+
+CROSS JOIN Query:
+
+SELECT Name, Gender, Salary, DepartmentName
+FROM tblEmployee
+CROSS JOIN tblDepartment
+
+------------------ INNER JOIN -------------------------
+
+-->  returns only the matching rows between both the tables. Non matching rows are eliminated.
+
+SELECT Name, Gender, Salary, DepartmentName
+FROM tblEmployee
+INNER JOIN tblDepartment
+ON tblEmployee.DepartmentId = tblDepartment.Id
+
+OR
+
+SELECT Name, Gender, Salary, DepartmentName
+FROM tblEmployee
+JOIN tblDepartment
+ON tblEmployee.DepartmentId = tblDepartment.Id
+
+----------------- LEFT OUTER JOIN ----------------------
+
+-->  returns all the matching rows + non matching rows from the left table. In reality, INNER JOIN and LEFT JOIN are extensively used.
+
+SELECT Name, Gender, Salary, DepartmentName
+FROM tblEmployee
+LEFT OUTER JOIN tblDepartment
+ON tblEmployee.DepartmentId = tblDepartment.Id
+
+OR
+
+SELECT Name, Gender, Salary, DepartmentName
+FROM tblEmployee
+LEFT JOIN tblDepartment
+ON tblEmployee.DepartmentId = tblDepartment.Id
+
+------------------ RIGHT OUTER JOIN ------------------------
+
+--> returns all the matching rows + non matching rows from the right table.
+
+SELECT Name, Gender, Salary, DepartmentName
+FROM tblEmployee
+RIGHT OUTER JOIN tblDepartment
+ON tblEmployee.DepartmentId = tblDepartment.Id
+
+OR
+
+SELECT Name, Gender, Salary, DepartmentName
+FROM tblEmployee
+RIGHT JOIN tblDepartment
+ON tblEmployee.DepartmentId = tblDepartment.Id
+
+------------------ FULL OUTER JOIN ------------------------
+
+--> returns all rows from both the left and right tables, including the non matching rows.
+
+SELECT Name, Gender, Salary, DepartmentName
+FROM tblEmployee
+FULL OUTER JOIN tblDepartment
+ON tblEmployee.DepartmentId = tblDepartment.Id
+
+OR
+
+SELECT Name, Gender, Salary, DepartmentName
+FROM tblEmployee
+FULL JOIN tblDepartment
+ON tblEmployee.DepartmentId = tblDepartment.Id
+
+
+------------------- How to retrieve only the non matching rows from the left table -----------------------------
+
+LEFT
+
+Query:
+SELECT       Name, Gender, Salary, DepartmentName
+FROM           tblEmployee E
+LEFT JOIN   tblDepartment D
+ON                 E.DepartmentId = D.Id
+WHERE        D.Id IS NULL
+
+
+RIGHT
+
+Query:
+SELECT         Name, Gender, Salary, DepartmentName
+FROM             tblEmployee E
+RIGHT JOIN    tblDepartment D
+ON                   E.DepartmentId = D.Id
+WHERE          E.DepartmentId IS NULL
+
+
+FULL
+
+SELECT         Name, Gender, Salary, DepartmentName
+FROM              tblEmployee E
+FULL JOIN      tblDepartment D
+ON                   E.DepartmentId = D.Id
+WHERE          E.DepartmentId IS NULL
+OR                   D.Id IS NULL
+
+
+-------------------------- Self Join ---------------------------------
+
+-->  joining a table with itself is called as SELF JOIN. SELF JOIN is not a different type of JOIN. It can be classified under any type of JOIN - INNER, OUTER or CROSS Joins. The above query is, LEFT OUTER SELF Join.
+
+Inner Self Join tblEmployee table:
+
+Select E.Name as Employee, M.Name as Manager
+from tblEmployee E
+Inner Join tblEmployee M
+On E.ManagerId = M.EmployeeId
+
+
+Left Self Join tblEmployee table:
+
+Select E.Name as Employee, M.Name as Manager
+from tblEmployee E
+Left Join tblEmployee M
+On E.ManagerId = M.EmployeeId
+
+
+Cross Self Join tblEmployee table:
+
+Select E.Name as Employee, M.Name as Manager
+from tblEmployee
+Cross Join tblEmployee
+
+
+---------------------------- Ways to Replacing NULL Values from database ------------------------------------
+
+1. ISNULL() function
+2. CASE statement
+3. COALESCE() function	-> returns the first NON-NULL value.
+
+
+Select Name, Email, ISNULL(GenderID, 3) from tblPerson
+
+Select Name, Email, 
+CASE 
+WHEN GenderID IS NULL THEN 3 Else GenderID
+END
+from tblPerson
+
+Select Name, Email, COALESCE(GenderID, 3) from tblPerson
+
+Select COALESCE(FirstName, MiddleName, LastName, 'Unknown') As Employee_Name from tblEmployee
+
+---------------------------- UNION & UNIONALL ------------------------------------
+
+--> UNION and UNION ALL operators in SQL Server, are used to combine the result-set of two or more SELECT queries. 
+
+--> Combining the rows of tblIndiaCustomers and tblUKCustomers using UNION ALL
+Select Id, Name, Email from tblIndiaCustomers
+UNION ALL
+Select Id, Name, Email from tblUKCustomers
+
+--> Combining the rows of tblIndiaCustomers and tblUKCustomers using UNION
+Select Id, Name, Email from tblIndiaCustomers
+UNION
+Select Id, Name, Email from tblUKCustomers
+
+--> UNION removes duplicate rows, where as UNION ALL does not. When use UNION, to remove the duplicate rows, sql server has to to do a distinct sort, which is time consuming. For this reason, UNION ALL is much faster than UNION. 
+
+--> For UNION and UNION ALL to work, the Number, Data types, and the order of the columns in the select statements should be same.
+
+--> If you want to sort, the results of UNION or UNION ALL, the ORDER BY caluse should be used on the last SELECT statement as shown below.
+Select Id, Name, Email from tblIndiaCustomers
+UNION ALL
+Select Id, Name, Email from tblUKCustomers
+UNION ALL
+Select Id, Name, Email from tblUSCustomers
+Order by Name
+
+---------------------------------------- Difference between JOIN and UNION --------------------------------------------
+
+--> UNION combines the result-set of two or more select queries into a single result-set which includes all the rows from all the queries in the union, where as JOINS, retrieve data from two or more tables based on logical relationships between the tables. In short, UNION combines rows from 2 or more tables, where JOINS combine columns from 2 or more table.
+
+---------------------------------------- STORED PROCEDURE --------------------------------------------
+
+--> The following system stored procedures, are extremely useful when working procedures.
+
+1. sp_help SP_Name : View the information about the stored procedure, like parameter names, their datatypes etc. sp_help can be used with any database object, like tables, views, SP's, triggers etc. Alternatively, you can also press ALT+F1, when the name of the object is highlighted.
+
+2. sp_helptext SP_Name : View the Text of the stored procedure
+
+3. sp_depends SP_Name : View the dependencies of the stored procedure. This system SP is very useful, especially if you want to check, if there are any stored procedures that are referencing a table that you are abput to drop. sp_depends can also be used with other database objects like table etc.
+
+
+----------------------------------------- RETURN VALUE IN STORED PROCEDURE -----------------------------------------
+
+--> Whenever, you execute a stored procedure, it returns an integer status variable. Usually, zero indicates success, and non-zero indicates failure. To see this yourself, execute any stored procedure from the object explorer, in sql server management studio. 
+--> The following procedure returns total number of employees in the Employees table, using output parameter - @TotalCount.
+
+Create Procedure spGetTotalCountOfEmployees1
+@TotalCount int output
+as
+Begin
+ Select @TotalCount = COUNT(ID) from tblEmployee
+End
+
+--> Executing spGetTotalCountOfEmployees1 returns 3.
+
+Declare @TotalEmployees int
+Execute spGetTotalCountOfEmployees @TotalEmployees Output
+Select @TotalEmployees
+
+--> Re-written stored procedure using return variables
+
+Create Procedure spGetTotalCountOfEmployees2
+as
+Begin
+ return (Select COUNT(ID) from Employees)
+End
+
+--> Executing spGetTotalCountOfEmployees2 returns 3.
+
+Declare @TotalEmployees int
+Execute @TotalEmployees = spGetTotalCountOfEmployees2
+Select @TotalEmployees
+
+So, we are able to achieve what we want, using output parameters as well as return values. Now, let's look at example, where return status variables cannot be used, but Output parameters can be used.
+
+--> In this SP, we are retrieving the Name of the employee, based on their Id, using the output parameter @Name.
+
+Create Procedure spGetNameById1
+@Id int,
+@Name nvarchar(20) Output
+as
+Begin
+ Select @Name = Name from tblEmployee Where Id = @Id
+End
+
+--> Executing spGetNameById1, prints the name of the employee
+
+Declare @EmployeeName nvarchar(20)
+Execute spGetNameById1 3, @EmployeeName out
+Print 'Name of the Employee = ' + @EmployeeName
+
+--> Now let's try to achieve the same thing, using return status variables.
+
+Create Procedure spGetNameById2
+@Id int
+as
+Begin
+ Return (Select Name from tblEmployee Where Id = @Id)
+End
+
+--> Executing spGetNameById2 returns an error stating 'Conversion failed when converting the nvarchar value 'Sam' to data type int.'. The return status variable is an integer, and hence, when we select Name of an employee and try to return that we get a converion error. 
+
+Declare @EmployeeName nvarchar(20)
+Execute @EmployeeName = spGetNameById2 1
+Print 'Name of the Employee = ' + @EmployeeName
+
+--> So, using return values, we can only return integers, and that too, only one integer. It is not possible, to return more than one value using return values, where as output parameters, can return any datatype and an sp can have more than one output parameters. I always prefer, using output parameters, over RETURN values.
+
+--> In general, RETURN values are used to indicate success or failure of stored procedure, especially when we are dealing with nested stored procedures.Return a value of 0, indicates success, and any nonzero value indicates failure.
+
+------------------------------------------- ADVANTAGES OF STORED PROCEDURES ------------------------------------------
+
+1. Execution plan retention and reusability - Stored Procedures are compiled and their execution plan is cached and used again, when the same SP is executed again. Although adhoc queries also create and reuse plan, the plan is reused only when the query is textual match and the datatypes are matching with the previous call. Any change in the datatype or you have an extra space in the query then, a new plan is created.
+
+2. Reduces network traffic - You only need to send, EXECUTE SP_Name statement, over the network, instead of the entire batch of adhoc SQL code.
+
+3. Code reusability and better maintainability - A stored procedure can be reused with multiple applications. If the logic has to change, we only have one place to change, where as if it is inline sql, and if you have to use it in multiple applications, we end up with multiple copies of this inline sql. If the logic has to change, we have to change at all the places, which makes it harder maintaining inline sql.
+
+4. Better Security - A database user can be granted access to an SP and prevent them from executing direct "select" statements against a table.  This is fine grain access control which will help control what data a user has access to.
+
+5. Avoids SQL Injection attack - SP's prevent sql injection attack.
+
+
+------------------------------------------ SQL SERVER Build In Functions -----------------------------------------------------
+
+--> SQL Server has many built-in functions.
+
+--> This reference contains string, numeric, date, conversion, and some advanced functions in SQL Server.
+
+------------------------------- SQL Server String Functions -------------------------------------
+
+   Function						Description
+
+1. ASCII		--->		Returns the ASCII value for the specific character
+2. CHAR		--->		Returns the character based on the ASCII code
+3. CHARINDEX	--->		Returns the position of a substring in a string
+4. CONCAT		--->		Adds two or more strings together
+5. Concat with +	--->		Adds two or more strings together
+6. CONCAT_WS	--->		Adds two or more strings together with a separator
+7. DATALENGTH	--->		Returns the number of bytes used to represent an expression
+8. DIFFERENCE	--->		Compares two SOUNDEX values, and returns an integer value
+9. FORMAT		--->		Formats a value with the specified format
+10. LEFT		--->		Extracts a number of characters from a string (starting from left)
+11. LEN		--->		Returns the length of a string
+12. LOWER		--->		Converts a string to lower-case
+13. LTRIM		--->		Removes leading spaces from a string
+14. NCHAR		--->		Returns the Unicode character based on the number code
+15. PATINDEX	--->		Returns the position of a pattern in a string
+16. QUOTENAME	--->		Returns a Unicode string with delimiters added to make the string a valid SQL Server delimited identifier
+17. REPLACE	--->		Replaces all occurrences of a substring within a string, with a new substring
+18. REPLICATE	--->		Repeats a string a specified number of times
+19. REVERSE	--->		Reverses a string and returns the result
+20. RIGHT		--->		Extracts a number of characters from a string (starting from right)
+21. RTRIM		--->		Removes trailing spaces from a string
+22. SOUNDEX	--->		Returns a four-character code to evaluate the similarity of two strings
+23. SPACE		--->		Returns a string of the specified number of space characters
+24. STR		--->		Returns a number as string
+25. STUFF		--->		Deletes a part of a string and then inserts another part into the string, starting at a specified position
+26. SUBSTRING	--->		Extracts some characters from a string
+27. TRANSLATE	--->		Returns the string from the first argument after the characters specified in the second argument are translated into the characters 						specified in the third argument.
+28. TRIM		--->		Removes leading and trailing spaces (or other specified characters) from a string
+29. UNICODE	--->		Returns the Unicode value for the first character of the input expression
+30. UPPER		--->		Converts a string to upper-case
+
+------------------------------- SQL Server Date Functions -------------------------------------
+
+Function						Format							Description
+
+1. GETDATE()				2012-08-31 20:15:04.543				Commonly used function
+2. CURRENT_TIMESTAMP		2012-08-31 20:15:04.543				ANSI SQL equivalent to GETDATE
+3. SYSDATETIME()				2012-08-31 20:15:04.5380028			More fractional seconds precision
+4. SYSDATETIMEOFFSET()		2012-08-31 20:15:04.5380028 + 01:00		More fractional seconds precision + Time zone offset
+5. GETUTCDATE()				2012-08-31 19:15:04.543				UTC Date and Time
+6. SYSUTCDATETIME()			2012-08-31 19:15:04.5380028			UTC Date and Time, with More fractional seconds precision
+
+-------------------------------------- ISDATE() -------------------------------
+
+ISDATE() - Checks if the given value, is a valid date, time, or datetime. Returns 1 for success, 0 for failure.
+
+Examples:
+Select ISDATE('PRAGIM') -- returns 0
+Select ISDATE(Getdate()) -- returns 1
+Select ISDATE('2012-08-31 21:02:04.167') -- returns 1
+
+Note: For datetime2 values, IsDate returns ZERO.
+
+Example:
+Select ISDATE('2012-09-01 11:34:21.1918447') -- returns 0.
+
+-------------------------------------- Day() -------------------------------
+
+Day() - Returns the 'Day number of the Month' of the given date
+
+Examples:
+Select DAY(GETDATE()) -- Returns the day number of the month, based on current system datetime.
+Select DAY('01/31/2012') -- Returns 31
+
+-------------------------------------- Month() -------------------------------
+
+Month() - Returns the 'Month number of the year' of the given date
+
+Examples:
+Select Month(GETDATE()) -- Returns the Month number of the year, based on the current system date and time
+Select Month('01/31/2012') -- Returns 1
+
+-------------------------------------- Year() -------------------------------
+
+Year() - Returns the 'Year number' of the given date
+
+Examples:
+Select Year(GETDATE()) -- Returns the year number, based on the current system date
+Select Year('01/31/2012') -- Returns 2012
+
+-------------------------------------- DateName(DatePart, Date) -------------------------------
+
+DateName(DatePart, Date) - Returns a string, that represents a part of the given date. This functions takes 2 parameters. The first parameter 'DatePart' specifies, the part of the date, we want. The second parameter, is the actual date, from which we want the part of the Date.
+
+Examples:
+Select DATENAME(Day, '2012-09-30 12:43:46.837') -- Returns 30
+Select DATENAME(WEEKDAY, '2012-09-30 12:43:46.837') -- Returns Sunday
+Select DATENAME(MONTH, '2012-09-30 12:43:46.837') -- Returns September
+
+
+QUERY EXAMPLE
+ 
+Select Name, DateOfBirth, DateName(WEEKDAY,DateOfBirth) as [Day], 
+            Month(DateOfBirth) as MonthNumber, 
+            DateName(MONTH, DateOfBirth) as [MonthName],
+            Year(DateOfBirth) as [Year]
+From   tblEmployees
+
+-------------------------------------- DatePart(DatePart, Date) -------------------------------
+
+DatePart(DatePart, Date) - Returns an integer representing the specified DatePart. This function is simialar to DateName(). DateName() returns nvarchar, where as DatePart() returns an integer.
+
+Examples:
+Select DATEPART(weekday, '2012-08-30 19:45:31.793') -- returns 5
+Select DATENAME(weekday, '2012-08-30 19:45:31.793') -- returns Thursday
+
+-------------------------------------- DATEADD (datepart, NumberToAdd, date) -------------------------------
+
+DATEADD (datepart, NumberToAdd, date) - Returns the DateTime, after adding specified NumberToAdd, to the datepart specified of the given date.
+
+Examples:
+Select DateAdd(DAY, 20, '2012-08-30 19:45:31.793') 
+-- Returns 2012-09-19 19:45:31.793
+Select DateAdd(DAY, -20, '2012-08-30 19:45:31.793') 
+-- Returns 2012-08-10 19:45:31.793
+
+-------------------------------------- DATEDIFF(datepart, startdate, enddate) -------------------------------
+
+DATEDIFF(datepart, startdate, enddate) - Returns the count of the specified datepart boundaries crossed between the specified startdate and enddate.
+
+Examples:
+Select DATEDIFF(MONTH, '11/30/2005','01/31/2006') -- returns 2
+Select DATEDIFF(DAY, '11/30/2005','01/31/2006') -- returns 62
+
+-------------------------------------- CAST & CONVERT -------------------------------
+
+To convert one data type to another, CAST and CONVERT functions can be used. 
+
+Syntax of CAST and CONVERT functions from MSDN:
+1. CAST ( expression AS data_type [ ( length ) ] )
+2. CONVERT ( data_type [ ( length ) ] , expression [ , style ] )
+
+From the syntax, it is clear that CONVERT() function has an optional style parameter, where as CAST() function lacks this capability.
+
+EXAMPLE :
+1. Select Id, Name, DateOfBirth, CAST(DateofBirth as nvarchar) as ConvertedDOB
+from tblEmployees
+2. Select Id, Name, DateOfBirth, Convert(nvarchar, DateOfBirth) as ConvertedDOB
+from tblEmployees
+
+To get just the date part, from DateTime
+SELECT CONVERT(VARCHAR(10),GETDATE(),101)
+
+In SQL Server 2008, Date datatype is introduced, so you can also use
+SELECT CAST(GETDATE() as DATE)
+SELECT CONVERT(DATE, GETDATE())
+
+Note: To control the formatting of the Date part, DateTime has to be converted to NVARCHAR using the styles provided. When converting to DATE data type, the CONVERT() function will ignore the style parameter.
+
+-------------------------------------------------------- CAST V/S CONVERT -----------------------------------------------------------
+
+1. Cast is based on ANSI standard and Convert is specific to SQL Server. So, if portability is a concern and if you want to use the script with other database applications, use Cast(). 
+2. Convert provides more flexibility than Cast. For example, it's possible to control how you want DateTime datatypes to be converted using styles with convert function.
+
+The general guideline is to use CAST(), unless you want to take advantage of the style functionality in CONVERT().
+
+-------------------------------------------------------- MATHEMATICAL FUNCTIONS -----------------------------------------------------------
+
+--> Mathematical functions in sql server like, Abs, Ceiling, Floor, Power, Rand, Square, Sqrt, and Round functions
+
+1. ABS ( numeric_expression ) - ABS stands for absolute and returns, the absolute (positive) number. 
+
+For example, Select ABS(-101.5) -- returns 101.5, without the - sign.
+
+2. CEILING ( numeric_expression ) and FLOOR ( numeric_expression )
+CEILING and FLOOR functions accept a numeric expression as a single parameter. CEILING() returns the smallest integer value greater than or equal to the parameter, whereas FLOOR() returns the largest integer less than or equal to the parameter. 
+
+Examples:
+Select CEILING(15.2) -- Returns 16
+Select CEILING(-15.2) -- Returns -15
+
+Select FLOOR(15.2) -- Returns 15
+Select FLOOR(-15.2) -- Returns -16
+
+3. Power(expression, power) - Returns the power value of the specified expression to the specified power.
+
+Example: The following example calculates '2 TO THE POWER OF 3' = 2*2*2 = 8
+Select POWER(2,3) -- Returns 8
+
+4. RAND([Seed_Value]) - Returns a random float number between 0 and 1. Rand() function takes an optional seed parameter. When seed value is supplied the 
+
+RADN() function always returns the same value for the same seed.
+
+Example:
+Select RAND(1) -- Always returns the same value
+
+If you want to generate a random number between 1 and 100, RAND() and FLOOR() functions can be used as shown below. Every time, you execute this query, you get a random number between 1 and 100.
+Select FLOOR(RAND() * 100)
+
+5. SQUARE ( Number ) - Returns the square of the given number.
+
+Example:
+Select SQUARE(9) -- Returns 81
+
+6. SQRT ( Number ) - SQRT stands for Square Root. This function returns the square root of the given value.
+
+Example:
+Select SQRT(81) -- Returns 9
+
+7. ROUND ( numeric_expression , length [ ,function ] ) - Rounds the given numeric expression based on the given length. This function takes 3 parameters. 
+	1. Numeric_Expression is the number that we want to round.
+	2. Length parameter, specifies the number of the digits that we want to 	round to. If the length is a positive number, then the rounding is applied 	for the decimal part, where as if the length is negative, then the rounding 	is applied to the number before the decimal.
+	3. The optional function parameter, is used to indicate rounding or 	truncation operations. A value of 0, indicates rounding, where as a value of 	non zero indicates truncation. Default, if not specified is 0.
+
+Examples:
+-- Round to 2 places after (to the right) the decimal point
+Select ROUND(850.556, 2) -- Returns 850.560
+
+-- Truncate anything after 2 places, after (to the right) the decimal point
+Select ROUND(850.556, 2, 1) -- Returns 850.550
+
+-- Round to 1 place after (to the right) the decimal point
+Select ROUND(850.556, 1) -- Returns 850.600
+
+-- Truncate anything after 1 place, after (to the right) the decimal point
+Select ROUND(850.556, 1, 1) -- Returns 850.500
+
+-- Round the last 2 places before (to the left) the decimal point
+Select ROUND(850.556, -2) -- 900.000
+
+-- Round the last 1 place before (to the left) the decimal point
+Select ROUND(850.556, -1) -- 850.000
+
+
+
+
+
+
+
+
+
+
+
